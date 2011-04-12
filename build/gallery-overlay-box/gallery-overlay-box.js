@@ -1,3 +1,5 @@
+YUI.add('gallery-overlay-box', function(Y) {
+
 /*global Y*/
 var OVERLAYBOX = 'overlay-box';
 
@@ -19,7 +21,6 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             if (config.url) {
                 container.addClass('yui3-overlay-loading');
             } else {
-                Y.log('Nothing to display in the lightbox!');
             }
         } else {
             //Loadstuff from the given container into a more awesome one
@@ -158,3 +159,6 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         }
     }
 });
+
+
+}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher']});

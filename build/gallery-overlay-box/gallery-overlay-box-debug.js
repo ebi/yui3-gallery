@@ -1,3 +1,5 @@
+YUI.add('gallery-overlay-box', function(Y) {
+
 /*global Y*/
 var OVERLAYBOX = 'overlay-box';
 
@@ -158,3 +160,6 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         }
     }
 });
+
+
+}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher']});
