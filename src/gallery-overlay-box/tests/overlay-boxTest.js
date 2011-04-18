@@ -29,7 +29,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
      * @return YUINode container with an ID
      */
     function doCreateContainer() {
-        var container = Y.Node.create('<div id="' + randomString() + '" class="overlaybox-hidden hullahulla createdContainer">Foobar</div>');
+        var container = Y.Node.create('<div id="' + randomString() + '" class="yui3-overlaybox-hidden hullahulla createdContainer">Foobar</div>');
         Y.one(document.body).append(container);
         return container;
     }
@@ -49,11 +49,12 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             assertTrue(ob.get('toggleHidden'));
             assertFalse(ob.get('loadedContent'));
             assertFalse(ob.get('reload'));
-            assertSame(Y.one('.overlaybox_mask'), ob.get('greyOverlay'));
-            assertSame(Y.one('.overlaybox'), ob.get('container'));
-            assertSame(Y.one('.overlaybox .overlaybox_close_button'), ob.get('container').one('.overlaybox_close_button'));
+            assertEquals(99, ob.get('zIndex'));
+            assertSame(Y.one('.yui3-overlaybox-mask'), ob.get('greyOverlay'));
+            assertSame(Y.one('.yui3-overlaybox'), ob.get('container'));
+            assertSame(Y.one('.yui3-overlaybox .yui3-overlaybox-close-button'), ob.get('container').one('.yui3-overlaybox-close-button'));
 
-            ob.get('container').one('.overlaybox_close_button').simulate('click');
+            ob.get('container').one('.yui3-overlaybox-close-button').simulate('click');
         },
 
         'test that a container replacement gets correctly instantiated': function () {
@@ -62,8 +63,8 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob = new Y.OverlayBox({ container: container.get('id') });
 
             assertNull(Y.one('body > .hullahulla'));
-            assertNull(Y.one('.overlaybox .overlaybox-hidden'));
-            assertNotNull(Y.one('.overlaybox .hullahulla'));
+            assertNull(Y.one('.yui3-overlaybox .yui3-overlaybox-hidden'));
+            assertNotNull(Y.one('.yui3-overlaybox .hullahulla'));
             assertTrue(ob.get('loadedContent'));
         },
 
@@ -82,7 +83,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob = new Y.OverlayBox({ container: container.get('id') });
             ob.show();
 
-            assertNull(Y.one('.overlaybox-hidden'));
+            assertNull(Y.one('.yui3-overlaybox-hidden'));
             assertCalledOnce(Y.Overlay);
             assertCalledWithExactly(Y.Overlay, {
                 srcNode: ob.get('container'),
@@ -105,7 +106,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob._set('loadedContent', true);
             ob.show(); //Make sure it doesn't do ajax request again
 
-            assertNull(Y.one('.overlaybox-hidden'));
+            assertNull(Y.one('.yui3-overlaybox-hidden'));
             assertInstanceOf(Y.Overlay, ob.get('overlay'));
 
             assertCalledOnce(Y.Dispatcher);
@@ -124,8 +125,8 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob._set('overlay', { hide: this.spy() });
             ob.hide();
 
-            assertTrue(ob.get('greyOverlay').hasClass('overlaybox-hidden'));
-            assertTrue(ob.get('container').hasClass('overlaybox-hidden'));
+            assertTrue(ob.get('greyOverlay').hasClass('yui3-overlaybox-hidden'));
+            assertTrue(ob.get('container').hasClass('yui3-overlaybox-hidden'));
             assertCalledOnce(ob.get('overlay').hide);
         },
 
@@ -135,10 +136,10 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
 
             ob = new Y.OverlayBox({ container: container.get('id'), toggleHidden: false });
             ob.show();
-            assertTrue(ob.get('container').hasClass('overlaybox-hidden'));
-            ob.get('container').removeClass('overlaybox-hidden');
+            assertTrue(ob.get('container').hasClass('yui3-overlaybox-hidden'));
+            ob.get('container').removeClass('yui3-overlaybox-hidden');
             ob.hide();
-            assertFalse(ob.get('container').hasClass('overlaybox-hidden'));
+            assertFalse(ob.get('container').hasClass('yui3-overlaybox-hidden'));
         },
 
         'test refresh': function () {
