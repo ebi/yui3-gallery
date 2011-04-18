@@ -9,7 +9,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         var container, originalNode, closeButton, greyOverlay;
 
         //Setting up the container
-        container = Y.Node.create('<div class="overlaybox hidden"></div>');
+        container = Y.Node.create('<div class="overlaybox overlaybox-hidden"></div>');
         if (! config.container) {
             //No container is given so it should be an ajax overlaybox
             closeButton = Y.Node.create('<div class="overlaybox_close_button"></div>');
@@ -27,7 +27,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             //Loadstuff from the given container into a more awesome one
             originalNode = Y.one('#' + config.container);
             container.insert(originalNode.cloneNode(true), 'replace');
-            container.get('firstChild').removeClass('hidden');
+            container.get('firstChild').removeClass('overlaybox-hidden');
             originalNode.remove();
             this._set('loadedContent', true);
         }
@@ -36,7 +36,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
 
         //Setup the overlay
         if (! config.greyOverlay) {
-            greyOverlay = Y.Node.create('<div class="overlay hidden"></div>');
+            greyOverlay = Y.Node.create('<div class="overlaybox_mask overlaybox-hidden"></div>');
             greyOverlay.on('click', this.hide, this);
             Y.one(document.body).append(greyOverlay);
             this.set('greyOverlay', greyOverlay);
@@ -69,27 +69,25 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             dispatcher = new Y.Dispatcher({
                 node: this.get('container')
             });
-            dispatcher.after('loadingChange', this.refresh, this);
+            dispatcher.on('ready', this.refresh, this);
             dispatcher.set('uri', this.get('url'));
             this._set('loadedContent', true);
         }
         if (this.get('toggleHidden')) {
-            this.get('container').removeClass('hidden');
+            this.get('container').removeClass('overlaybox-hidden');
         }
 
-        if(Y.Lang.isUndefined(overlay)) {
+        if (Y.Lang.isUndefined(overlay)) {
             overlay = new Y.Overlay({
                 srcNode: this.get('container'),
                 zIndex: 99,
-                align: {
-                    points: [Y.WidgetPositionAlign.TC, Y.WidgetPositionAlign.TC]
-                },
-                plugins: [{ fn: Y.Plugin.OverlayKeepaligned }]
+                centered: true,
+                plugins: [ Y.Plugin.OverlayKeepaligned ]
             });
             overlay.render();
             this.set('overlay', overlay);
         }
-        this.get('greyOverlay').removeClass('hidden');
+        this.get('greyOverlay').removeClass('overlaybox-hidden');
         overlay.show();
     },
 
@@ -100,9 +98,9 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
      */
     hide: function () {
         if (this.get('toggleHidden')) {
-            this.get('container').addClass('hidden');
+            this.get('container').addClass('overlaybox-hidden');
         }
-        this.get('greyOverlay').addClass('hidden');
+        this.get('greyOverlay').addClass('overlaybox-hidden');
         if (this.get('overlay')) {
             this.get('overlay').hide();
         }
@@ -130,6 +128,19 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
     setContent: function (content) {
         this.get('container').insert(content);
         this.refresh();
+    },
+
+    /**
+     * Binds a click event and prevents the default action
+     *
+     * @param YUINode the Element to bind on
+     * @return the event handler
+     */
+    bindClick: function (element) {
+        return element.on('click', function (event) {
+            event.halt();
+            this.show();
+        }, this);
     }
 }, {
     ATTRS: {

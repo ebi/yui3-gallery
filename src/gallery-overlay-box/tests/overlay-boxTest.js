@@ -29,7 +29,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
      * @return YUINode container with an ID
      */
     function doCreateContainer() {
-        var container = Y.Node.create('<div id="' + randomString() + '" class="hidden hullahulla createdContainer">Foobar</div>');
+        var container = Y.Node.create('<div id="' + randomString() + '" class="overlaybox-hidden hullahulla createdContainer">Foobar</div>');
         Y.one(document.body).append(container);
         return container;
     }
@@ -49,7 +49,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             assertTrue(ob.get('toggleHidden'));
             assertFalse(ob.get('loadedContent'));
             assertFalse(ob.get('reload'));
-            assertSame(Y.one('.overlay'), ob.get('greyOverlay'));
+            assertSame(Y.one('.overlaybox_mask'), ob.get('greyOverlay'));
             assertSame(Y.one('.overlaybox'), ob.get('container'));
             assertSame(Y.one('.overlaybox .overlaybox_close_button'), ob.get('container').one('.overlaybox_close_button'));
 
@@ -62,7 +62,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob = new Y.OverlayBox({ container: container.get('id') });
 
             assertNull(Y.one('body > .hullahulla'));
-            assertNull(Y.one('.overlaybox .hidden'));
+            assertNull(Y.one('.overlaybox .overlaybox-hidden'));
             assertNotNull(Y.one('.overlaybox .hullahulla'));
             assertTrue(ob.get('loadedContent'));
         },
@@ -82,13 +82,13 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob = new Y.OverlayBox({ container: container.get('id') });
             ob.show();
 
-            assertNull(Y.one('.hidden'));
+            assertNull(Y.one('.overlaybox-hidden'));
             assertCalledOnce(Y.Overlay);
             assertCalledWithExactly(Y.Overlay, {
                 srcNode: ob.get('container'),
                 zIndex: 99,
-                align: { points: [Y.WidgetPositionAlign.TC, Y.WidgetPositionAlign.TC] },
-                plugins: [{ fn: Y.Plugin.OverlayKeepaligned }]
+                centered: true,
+                plugins: [ Y.Plugin.OverlayKeepaligned ]
             });
         },
 
@@ -96,7 +96,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             var ob = new Y.OverlayBox({ url: 'foobar' });
 
             this.spy(Y, 'Dispatcher');
-            this.spy(Y.Dispatcher.prototype, 'after');
+            this.spy(Y.Dispatcher.prototype, 'on');
             this.spy(Y.Dispatcher.prototype, 'set');
 
             assertFalse(ob.get('loadedContent'));
@@ -105,12 +105,12 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob._set('loadedContent', true);
             ob.show(); //Make sure it doesn't do ajax request again
 
-            assertNull(Y.one('.hidden'));
+            assertNull(Y.one('.overlaybox-hidden'));
             assertInstanceOf(Y.Overlay, ob.get('overlay'));
 
             assertCalledOnce(Y.Dispatcher);
             assertCalledWithExactly(Y.Dispatcher, {node: ob.get('container')});
-            assertCalledWithExactly(Y.Dispatcher.prototype.after, 'loadingChange', ob.refresh, ob);
+            assertCalledWithExactly(Y.Dispatcher.prototype.on, 'ready', ob.refresh, ob);
             assertCalledWithExactly(Y.Dispatcher.prototype.set, 'uri', 'foobar');
 
         },
@@ -124,8 +124,8 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob._set('overlay', { hide: this.spy() });
             ob.hide();
 
-            assertTrue(ob.get('greyOverlay').hasClass('hidden'));
-            assertTrue(ob.get('container').hasClass('hidden'));
+            assertTrue(ob.get('greyOverlay').hasClass('overlaybox-hidden'));
+            assertTrue(ob.get('container').hasClass('overlaybox-hidden'));
             assertCalledOnce(ob.get('overlay').hide);
         },
 
@@ -135,10 +135,10 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
 
             ob = new Y.OverlayBox({ container: container.get('id'), toggleHidden: false });
             ob.show();
-            assertTrue(ob.get('container').hasClass('hidden'));
-            ob.get('container').removeClass('hidden');
+            assertTrue(ob.get('container').hasClass('overlaybox-hidden'));
+            ob.get('container').removeClass('overlaybox-hidden');
             ob.hide();
-            assertFalse(ob.get('container').hasClass('hidden'));
+            assertFalse(ob.get('container').hasClass('overlaybox-hidden'));
         },
 
         'test refresh': function () {
@@ -180,6 +180,20 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             ob.destroy();
             assertCalledOnce(ob.get('overlay').destroy);
             assertCalledOnce(ob.get('greyOverlay').remove);
+        },
+
+        'test that bindClick binds an event and executes the open': function () {
+            var ob, container, link;
+            container = doCreateContainer();
+            link = Y.Node.create('<a href="/index.html">Some Link</a>')
+
+            ob = new Y.OverlayBox({ container: container.get('id') });
+            ob.show = this.spy(ob.show);
+            ob.bindClick(link);
+
+            link.simulate('click');
+
+            assertCalledOnce(ob.show);
         }
     }));
 });
