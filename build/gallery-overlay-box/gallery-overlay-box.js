@@ -18,6 +18,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
                 this.hide();
             }, this);
             container.append(closeButton);
+            container.append('<div class="content" />');
             if (config.url) {
                 container.addClass('yui3-overlay-loading');
             } else {
@@ -66,7 +67,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         overlay = this.get('overlay');
         if (false === this.get('loadedContent')) {
             dispatcher = new Y.Dispatcher({
-                node: this.get('container')
+                node: this.get('container').one('.content')
             });
             dispatcher.on('ready', this.refresh, this);
             dispatcher.set('uri', this.get('url'));

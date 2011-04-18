@@ -109,7 +109,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             assertInstanceOf(Y.Overlay, ob.get('overlay'));
 
             assertCalledOnce(Y.Dispatcher);
-            assertCalledWithExactly(Y.Dispatcher, {node: ob.get('container')});
+            assertCalledWithExactly(Y.Dispatcher, {node: ob.get('container').one('.content')});
             assertCalledWithExactly(Y.Dispatcher.prototype.on, 'ready', ob.refresh, ob);
             assertCalledWithExactly(Y.Dispatcher.prototype.set, 'uri', 'foobar');
 
