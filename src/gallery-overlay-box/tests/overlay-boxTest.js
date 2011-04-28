@@ -209,6 +209,22 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             link.simulate('click');
 
             assertCalledOnce(ob.show);
+        },
+
+        'test that key event is added and works': function () {
+            var ob, container, events, handle;
+            container = doCreateContainer();
+
+            ob = new Y.OverlayBox({ container: container.get('id') });
+            ob.show();
+
+            ob.hide = this.spy(ob.hide);
+            handle = ob.get('keyHandle');
+            handle.detach = this.spy(handle.detach);
+            ob._set('keyHandle', handle);
+            Y.one(document).simulate('keypress', { charCode: 27 }); //Escape
+            assertCalledOnce(ob.hide);
+            assertCalledOnce(handle.detach);
         }
     }));
 });

@@ -64,7 +64,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
     * @return void
     */
     show: function () {
-        var overlay, dispatcher;
+        var overlay, dispatcher, handle;
         overlay = this.get('overlay');
         if (false === this.get('loadedContent')) {
             this.get('container').addClass('yui3-overlaybox-invisible'); //Used to prevent refresh flickering
@@ -91,6 +91,14 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         }
         this.get('greyOverlay').removeClass('yui3-overlaybox-hidden');
 
+        handle = Y.one(document).on('keypress', function (event) {
+            if (27 === event.keyCode) { //Escape
+                event.halt();
+                this.hide();
+            }
+        }, this);
+        this._set('keyHandle', handle);
+
         overlay.show();
     },
 
@@ -116,6 +124,10 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         this.get('greyOverlay').addClass('yui3-overlaybox-hidden');
         if (this.get('overlay')) {
             this.get('overlay').hide();
+        }
+
+        if (this.get('keyHandle')) {
+            this.get('keyHandle').detach();
         }
     },
 
@@ -185,6 +197,9 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         zIndex: {
             writeOnce: 'initOnly',
             value: 99
+        },
+        keyHandle: {
+            readOnly: true
         }
     }
 });
