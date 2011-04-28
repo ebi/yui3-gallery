@@ -69,10 +69,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             dispatcher = new Y.Dispatcher({
                 node: this.get('container').one('.content')
             });
-            dispatcher.on('ready', function () {
-                this.refresh();
-                this.get('container').removeClass('yui3-overlaybox-invisible');
-            }, this);
+            dispatcher.on('ready', this._showAfterDispatch, this);
             dispatcher.set('uri', this.get('url'));
             this._set('loadedContent', true);
         }
@@ -91,7 +88,18 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             this.set('overlay', overlay);
         }
         this.get('greyOverlay').removeClass('yui3-overlaybox-hidden');
+
         overlay.show();
+    },
+
+    /**
+     * Refreshs  and shows the overlay-box after it got dispatched.
+     *
+     * @return void
+     */
+    _showAfterDispatch: function () {
+        this.refresh();
+        this.get('container').removeClass('yui3-overlaybox-invisible');
     },
 
     /**

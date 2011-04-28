@@ -111,9 +111,23 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
 
             assertCalledOnce(Y.Dispatcher);
             assertCalledWithExactly(Y.Dispatcher, {node: ob.get('container').one('.content')});
-            assertCalledWithExactly(Y.Dispatcher.prototype.on, 'ready', ob.refresh, ob);
+            assertCalledWithExactly(Y.Dispatcher.prototype.on, 'ready', ob._showAfterDispatch, ob);
             assertCalledWithExactly(Y.Dispatcher.prototype.set, 'uri', 'foobar');
 
+        },
+
+        'test that showAfterDispatch refreshs and removes class': function () {
+            var ob, container;
+            container = doCreateContainer();
+
+            ob = new Y.OverlayBox({ container: container.get('id') });
+            ob.refresh = this.spy();
+            ob.get('container').addClass('yui3-overlaybox-invisible');
+
+            ob._showAfterDispatch();
+
+            assertCalledOnce(ob.refresh);
+            assertFalse(container.hasClass('yui3-overlaybox-invisible'));
         },
 
         'test that a overlaybox gets correctly hidden': function () {
