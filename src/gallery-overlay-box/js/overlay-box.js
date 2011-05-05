@@ -41,7 +41,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             this.set('greyOverlay', greyOverlay);
         }
 
-        Y.on('windowresize', function { Y.later(100, this, this.refresh); }, this);
+        Y.on('windowresize', function () { Y.later(100, this, this.refresh); }, this);
     },
 
     destructor: function () {

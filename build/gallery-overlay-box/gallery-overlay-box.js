@@ -41,6 +41,8 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             Y.one(document.body).append(greyOverlay);
             this.set('greyOverlay', greyOverlay);
         }
+
+        Y.on('windowresize', function () { Y.later(100, this, this.refresh); }, this);
     },
 
     destructor: function () {
@@ -204,4 +206,4 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
 });
 
 
-}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher'], skinnable:true});
+}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize'], skinnable:true});
