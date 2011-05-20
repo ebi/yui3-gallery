@@ -67,7 +67,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
     show: function () {
         var overlay, dispatcher, handle;
         overlay = this.get('overlay');
-        if (false === this.get('loadedContent')) {
+        if (false === this.get('loadedContent') || true === this.get('reload')) {
             this.get('container').addClass('yui3-overlaybox-invisible'); //Used to prevent refresh flickering
             dispatcher = new Y.Dispatcher({
                 node: this.get('container').one('.content')

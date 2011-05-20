@@ -116,6 +116,21 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
 
         },
 
+        'test that content gets fetched twice if reload is true': function () {
+            var ob = new Y.OverlayBox({ url: 'foobar', reload: true });
+
+            this.spy(Y, 'Dispatcher');
+            this.spy(Y.Dispatcher.prototype, 'on');
+            this.spy(Y.Dispatcher.prototype, 'set');
+
+            assertFalse(ob.get('loadedContent'));
+            ob.show();
+            assertTrue(ob.get('loadedContent'));
+            ob.show(); //Make sure it does request again now
+
+            assertCalledTwice(Y.Dispatcher);
+        },
+
         'test that showAfterDispatch refreshs and removes class': function () {
             var ob, container;
             container = doCreateContainer();
