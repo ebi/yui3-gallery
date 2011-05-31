@@ -1,13 +1,11 @@
 YUI.add('gallery-geo', function(Y) {
 
 /*global YUI*/
-//select * from geo.places where woeid in (select place.woeid from flickr.places where (lat,lon) in(select latitude,longitude from ip.location where ip="209.131.62.113"))
+
 /*
  * Copyright (c) 2011 Yahoo! Inc. All rights reserved.
  * Written by Nicholas C. Zakas, nczonline.net
  */
- 
-var IP_URL  = "http://www.geoplugin.net/json.gp?jsoncallback=";
 
 /**
  * Geolocation API
@@ -24,8 +22,11 @@ var IP_URL  = "http://www.geoplugin.net/json.gp?jsoncallback=";
  *      four properties: success (true/false), coords (an object), 
  *      timestamp, and source ("native" or "geoplugin").
  * @param scope {Object} (Optional) The this value for the callback function.
+ * @param opts {Object} (Optional) The PositionOptions object passed to
+ *      the getCurrentPosition function and has three optional properties:
+ *      enableHighAccuracy (true/false), timeout (number), maximumAge (number).
  */
-function getCurrentPositionByAPI(callback, scope){
+function getCurrentPositionByAPI(callback, scope, opts){
     navigator.geolocation.getCurrentPosition(
         function(data){
             callback.call(scope, {
@@ -47,9 +48,10 @@ function getCurrentPositionByAPI(callback, scope){
             if (error.code == 1) {  //user denied permission, so don't do anything
                 callback.call(scope, { success: false, denied: true });
             } else {    //try Geo IP Lookup instead
-                getCurrentPositionByGeoIp(callback,scope);        
+                getCurrentPositionByGeoIP(callback,scope);        
             }
-        }
+        },
+        opts
     );
 }
 
@@ -58,34 +60,49 @@ function getCurrentPositionByAPI(callback, scope){
  * @param callback {Function} The callback function to call when the
  *      request is complete. The object passed into the request has
  *      four properties: success (true/false), coords (an object), 
- *      timestamp, and source ("native" or "geoplugin").
+ *      timestamp, and source ("native" or "pidgets.geoip").
  * @param scope {Object} (Optional) The this value for the callback function.
+ * @param opts {Object} (Optional) The PositionOptions object passed to
+ *      the getCurrentPosition function and has three optional properties:
+ *      enableHighAccuracy (true/false) which is ingored, timeout (number),
+ *      maximumAge (number) passed to YQL request as maxAge URL-query param.
  */
-function getCurrentPositionByGeoIP(callback, scope){
+function getCurrentPositionByGeoIP(callback, scope, opts){
 
-    //Try to get by IP address
-    Y.jsonp(IP_URL, {
-        format: function(url, proxy){
-            return url + proxy;
-        },
+    opts = opts || {};
+    var yqlParams = Y.Lang.isNumber(opts.maximumAge) ?
+        { _maxage: opts.maximumAge } : {};
+    
+    Y.YQL("select * from pidgets.geoip", {
         on: {
             success: function(response){
-                callback.call(scope, {
-                    success: true,
-                    coords: {
-                        latitude: parseFloat(response.geoplugin_latitude),
-                        longitude: parseFloat(response.geoplugin_longitude),
-                        accuracy: Infinity    //TODO: Figure out better value
-                    },
-                    timestamp: +new Date(),
-                    source: "geoplugin"
-                });                
+                var results;
+                
+                if (response.error){
+                    callback.call(scope, { success: false });
+                } else {
+                    results = response.query.results.Result;
+                    callback.call(scope, {
+                        success: true,
+                        coords: {
+                            latitude: parseFloat(results.latitude),
+                            longitude: parseFloat(results.longitude),
+                            accuracy: Infinity    //TODO: Figure out better value
+                        },
+                        timestamp: +new Date(),
+                        source: "pidgets.geoip"
+                    });   
+                }
             },
             failure: function(){
                 callback.call(scope, { success: false });
+            },
+            timeout: function(){
+                callback.call(scope, { success: false });
             }
-        }
-    });
+        },
+        timeout: opts.timeout
+    }, yqlParams);
 
 }
 
@@ -113,4 +130,4 @@ Y.Geo = {
 };
 
 
-}, 'gallery-2011.04.27-17-14' ,{requires:['jsonp']});
+}, 'gallery-2011.05.12-13-26' ,{requires:['yql']});
