@@ -93,6 +93,10 @@ YUI.add('gallery-formmgr', function(Y) {
  * <p>More complex pre-validations can be added by overriding
  * <code>postValidateForm()</code>, described below.</p>
  *
+ * <p>Validation normally strips leading and trailing whitespace from every
+ * value.  If you have a special case where this should not be done, add
+ * the CSS class <code>yiv-no-trim</code> to the input field.</p>
+ *
  * <p>Derived classes may also override the following functions:</p>
  *
  * <dl>
@@ -125,15 +129,8 @@ function FormManager(
 	/* string */	form_name,
 	/* object */	config)		// {status_node, default_value_map}
 {
-	if (arguments.length === 0)	// derived class prototype
-	{
-		return;
-	}
-
-	if (!config)
-	{
-		config = {};
-	}
+	config = config || {};
+	FormManager.superclass.constructor.call(this, config);
 
 	this.form_name   = form_name;
 	this.status_node = Y.one(config.status_node);
@@ -316,13 +313,13 @@ FormManager.getStatusPrecedence = function(
 /**
  * Compare two status values.
  * 
- * @method Y.FormManager.statusTakesPrecendence
+ * @method Y.FormManager.statusTakesPrecedence
  * @static
  * @param orig_status {String} The name of the original status value.
  * @param new_status {String} The name of the new status value.
  * @return {boolean} <code>true</code> if <code>new_status</code> takes precedence over <code>orig_status</code>
  */
-FormManager.statusTakesPrecendence = function(
+FormManager.statusTakesPrecedence = function(
 	/* string */	orig_status,
 	/* string */	new_status)
 {
@@ -362,11 +359,12 @@ function getId(
 }
 
 /**
- * Trim leading and trailing whitespace from the specified fields.
+ * Trim leading and trailing whitespace from the specified fields, except
+ * when a field has the CSS class yiv-no-trim.
  * 
  * @method Y.FormManager.cleanValues
  * @static
- * @param e {Array|NodeList} The fields to clean.
+ * @param e {Array} The fields to clean.
  * @return {boolean} <code>true</code> if there are any file inputs.
  */
 FormManager.cleanValues = function(
@@ -385,7 +383,7 @@ FormManager.cleanValues = function(
 		{
 			// don't change the value
 		}
-		else if (input.value)
+		else if (input.value && !Y.DOM.hasClass(input, 'yiv-no-trim'))
 		{
 			input.value = Y.Lang.trim(input.value);
 		}
@@ -486,7 +484,7 @@ function populateForm1()
 	}
 }
 
-FormManager.prototype =
+Y.extend(FormManager, Y.Plugin.Host,
 {
 	/* *********************************************************************
 	 * Access functions.
@@ -510,6 +508,15 @@ FormManager.prototype =
 	hasFileInputs: function()
 	{
 		return this.has_file_inputs;
+	},
+
+	/**
+	 * @param node {String|Y.Node} the node in which status should be displayed
+	 */
+	setStatusNode: function(
+		/* Node */	node)
+	{
+		this.status_node = Y.one(node);
 	},
 
 	/**
@@ -598,6 +605,7 @@ FormManager.prototype =
 
 		if (!this.validation_msgs[id] || !this.validation_msgs[id].regex)
 		{
+			Y.error(Y.substitute('No error message provided for regex validation of {id}!', {id:id}), null, 'FormManager');
 		}
 	},
 
@@ -916,7 +924,9 @@ FormManager.prototype =
 	 */
 
 	/**
-	 * Register a button that can be disabled.  Buttons contained within
+	 * Register an object that can be disabled.  The object must support
+	 * the set('disabled', ...) API.  (The exception is DOM nodes, since
+	 * they are automatically wrapped in Y.Node.)  Buttons contained within
 	 * the form DOM element are automatically registered.
 	 * 
 	 * @param el {String|Object} The selector for the element or the element itself
@@ -926,7 +936,7 @@ FormManager.prototype =
 	{
 		var info =
 		{
-			e: Y.one(el)
+			e: Y.Lang.isString(el) || el.tagName ? Y.one(el) : el
 		};
 
 		this.user_button_list.push(info);
@@ -1074,7 +1084,7 @@ FormManager.prototype =
 
 		e     = Y.one(e);
 		var p = e.getAncestorByClassName(FormManager.row_marker_class);
-		if (p && FormManager.statusTakesPrecendence(FormManager.getElementStatus(p), type))
+		if (p && FormManager.statusTakesPrecedence(FormManager.getElementStatus(p), type))
 		{
 			var f = p.all('.'+FormManager.field_marker_class);
 			if (f)
@@ -1097,7 +1107,7 @@ FormManager.prototype =
 			}
 
 			var fieldset = e.getAncestorByTagName('fieldset');
-			if (fieldset && FormManager.statusTakesPrecendence(FormManager.getElementStatus(fieldset), type))
+			if (fieldset && FormManager.statusTakesPrecedence(FormManager.getElementStatus(fieldset), type))
 			{
 				fieldset.removeClass(rowStatusPattern());
 				fieldset.addClass(FormManager.row_status_prefix + type);
@@ -1175,20 +1185,12 @@ FormManager.prototype =
 		{
 		}
 	}
-};
+});
 
-if (Y.FormManager)	// static data & functions from gallery-formmgr-css-validation
-{
-	for (var key in Y.FormManager)
-	{
-		if (Y.FormManager.hasOwnProperty(key))
-		{
-			FormManager[key] = Y.FormManager[key];
-		}
-	}
-}
+// static data & functions from gallery-formmgr-css-validation
+Y.aggregate(FormManager, Y.FormManager);
 
 Y.FormManager = FormManager;
 
 
-}, 'gallery-2011.04.13-22-38' ,{requires:['gallery-node-optimizations','gallery-formmgr-css-validation']});
+}, 'gallery-2011.06.15-19-18' ,{requires:['pluginhost-base','gallery-node-optimizations','gallery-formmgr-css-validation'], optional:['gallery-scrollintoview']});

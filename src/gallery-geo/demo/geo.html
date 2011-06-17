@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <html>
 <head>
 <title>Geo Demo</title>
@@ -9,11 +11,11 @@
 <script type="text/javascript">  
     
 YUI({
-    gallery: 'gallery-2009.12.08-22',
+    gallery: 'gallery-2011.05.04-20-03',
     modules: {
         'gallery-geo': {
             fullpath: '../../../build/gallery-geo/gallery-geo.js',
-            requires: ["jsonp"],
+            requires: ["yql"],
             optional: [],
             supersedes: []
         }
@@ -29,10 +31,9 @@ YUI({
             console.log(data.coords.longitude);
             console.log(data.coords.accuracy);
         }
-    });
+    }, null, { enableHighAccuracy: true });
  
 });
-
 
 </script>
 </body>
