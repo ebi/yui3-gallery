@@ -5,6 +5,7 @@
 */
 
 var EVENT_TYPE = 'images:loaded',
+    COMPLETE = 'complete',
     DELEGATE = 'delegate',
     ON = 'on';
 
@@ -36,13 +37,13 @@ Y.Event.define(EVENT_TYPE, {
         subscription._images = [];
         Y.each(nodeList, function (subscriptionNode) {
             if ('IMG' === subscriptionNode.get('nodeName')) {
-                if (false === subscriptionNode.get('complete')) {
+                if (false === subscriptionNode.get(COMPLETE)) {
                     this._attachImageListeners(subscription, notifier, subscriptionNode);
                     subscription._images.push(subscriptionNode);
                 }
             } else {
                 Y.each(subscriptionNode.all('img'), function (image) {
-                    if (false === image.get('complete')) {
+                    if (false === image.get(COMPLETE)) {
                         this._attachImageListeners(subscription, notifier, image);
                         subscription._images.push(image);
                     }
@@ -56,7 +57,7 @@ Y.Event.define(EVENT_TYPE, {
     _checkImages: function (subscription, notifier) {
         var i = 0;
         Y.each(subscription._images, function (image) {
-            if (true === image.get('complete')) {
+            if (true === image.get(COMPLETE)) {
                 subscription._images.splice(i, 1);
             }
             i += 1;
