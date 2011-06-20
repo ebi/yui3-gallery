@@ -23,13 +23,10 @@ var EVENT_TYPE = 'images:loaded',
 
 Y.Event.define(EVENT_TYPE, {
     _attach: function (node, subscription, notifier, filter) {
-        var method = filter ? DELEGATE : ON, nodeList;
+        var method, nodeList;
 
         if (filter) {
             method = DELEGATE;
-            if (!Y.Lang.isString(filter)) {
-                throw new Error('only string filter is supported');
-            }
             nodeList = node.all(filter);
         } else {
             method = ON;
