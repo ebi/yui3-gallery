@@ -24,6 +24,7 @@ Y.Event.define(EVENT_TYPE, {
     _attach: function (node, subscription, notifier, filter) {
         var nodeList;
         subscription._images = [];
+        subscription._handles = [];
 
         if (filter) {
             nodeList = node.all(filter);
@@ -31,16 +32,16 @@ Y.Event.define(EVENT_TYPE, {
             nodeList = new Y.NodeList(node);
         }
 
-        Y.each(nodeList, function (subscriptionNode) {
+        nodeList.each(function (subscriptionNode) {
             if ('IMG' === subscriptionNode.get('nodeName')) {
                 if (false === subscriptionNode.get(COMPLETE)) {
-                    this._attachImageListeners(subscription, notifier, subscriptionNode);
+                    subscription._handles.push(subscriptionNode.on('load', this._imageLoaded, this, subscription, notifier));
                     subscription._images.push(subscriptionNode);
                 }
             } else {
-                Y.each(subscriptionNode.all('img'), function (image) {
+                subscriptionNode.all('img').each(function (image) {
                     if (false === image.get(COMPLETE)) {
-                        this._attachImageListeners(subscription, notifier, image);
+                        subscription._handles.push(image.on('load', this._imageLoaded, this, subscription, notifier));
                         subscription._images.push(image);
                     }
                 }, this);
@@ -63,6 +64,9 @@ Y.Event.define(EVENT_TYPE, {
             notifier.fire();
         }
     },
+    _imageLoaded: function (event, subscription, notifier) {
+        this._checkImages(subscription, notifier);
+    },
 
     _attachImageListeners: function (subscription, notifier, image) {
         var imageInstance = new Image();
@@ -70,11 +74,10 @@ Y.Event.define(EVENT_TYPE, {
         imageInstance.src = image.get('src');
     },
 
-    _detach: function (subscription, method) {
-        var handle = subscription['_' + method + 'Handle'];
-        if (handle) {
-            handle.cancel();
-        }
+    _detach: function (subscription) {
+        Y.each(subscription._handles, function (handle) {
+            handle.detach();
+        });
     },
 
     on: function (node, subscription, notifier) {
@@ -82,7 +85,7 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detach: function (node, subscription) {
-        this._detach(subscription, 'on');
+        this._detach(subscription);
     },
 
     delegate: function (node, subscription, notifier, filter) {
@@ -90,6 +93,6 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detachDelegate: function (node, subscription) {
-        this._detach(subscription, 'delegate');
+        this._detach(subscription);
     }
 });
