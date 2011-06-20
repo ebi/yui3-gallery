@@ -23,7 +23,7 @@ var EVENT_TYPE = 'images:loaded',
 
 Y.Event.define(EVENT_TYPE, {
     _attach: function (node, subscription, notifier, filter) {
-        var method = filter ? DELEGATE : ON, nodeList, image;
+        var method = filter ? DELEGATE : ON, nodeList;
 
         if (filter) {
             method = DELEGATE;
@@ -57,13 +57,13 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     _checkImages: function (subscription, notifier) {
-        var i, length, image;
-        for (i = 0, length = subscription._images.length; i < length; i += 1) {
-            image = subscription._images[i];
-            if (image && true === image.get('complete')) {
+        var i = 0;
+        Y.each(subscription._images, function (image) {
+            if (true === image.get('complete')) {
                 subscription._images.splice(i, 1);
             }
-        }
+            i += 1;
+        });
 
         if (0 === subscription._images.length) {
             notifier.fire();
