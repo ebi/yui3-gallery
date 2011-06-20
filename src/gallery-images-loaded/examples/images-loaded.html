@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/3.4.0pr1/build/yui/yui-min.js"></script>
+        <script type="text/javascript" src="../../../build/gallery-images-loaded/gallery-images-loaded.js "></script>
+    </head>
+    <body>
+        <div id="smallImages">
+            <img src="http://developer.yahoo.com/yui/docs/assets/examples/exampleimages/small/museum.jpg" />
+            <img src="http://developer.yahoo.com/yui/docs/assets/examples/exampleimages/small/uluru.jpg" />
+            <img src="http://developer.yahoo.com/yui/docs/assets/examples/exampleimages/small/katatjuta.jpg" />
+        </div>
+        <div id="bigImage">
+            <img width="100" height="100" src="http://developer.yahoo.com/yui/docs/assets/examples/exampleimages/large/uluru.jpg" />
+        </div>
+        <div id="reporter"></div>
+        <script type="text/javascript">
+YUI().use('event-custom', 'node', 'gallery-images-loaded', function (Y) {
+    Y.one('#smallImages').on ('images:loaded', function () {
+        Y.one('#reporter').append('<p>Imagesloaded on #smallImages fired!</p>');
+    });
+    Y.one('#bigImage').on ('images:loaded', function () {
+        Y.one('#reporter').append('<p>Imagesloaded on #bigImage fired!</p>');
+    });
+    Y.one('body').on('images:loaded', function () {
+        Y.one('#reporter').append('<p>Imagesloaded on body fired!</p>');
+    });
+    Y.one('body').delegate('images:loaded', function () {
+        Y.one('#reporter').append('<p>Imagesloaded on body delegate fired!</p>');
+    }, 'img');
+});
+        </script>
+    </body>
+</html>
