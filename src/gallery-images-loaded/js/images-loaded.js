@@ -4,7 +4,9 @@
 * @module images-loaded
 */
 
-var EVENT_TYPE = 'images:loaded';
+var EVENT_TYPE = 'images:loaded',
+    DELEGATE = 'delegate',
+    ON = 'on';
 
 /**
  * Provides a subscribable event named &quot;beacon:reached&quot;.
@@ -21,16 +23,16 @@ var EVENT_TYPE = 'images:loaded';
 
 Y.Event.define(EVENT_TYPE, {
     _attach: function (node, subscription, notifier, filter) {
-        var method = filter ? 'delegate' : 'on', nodeList, image;
+        var method = filter ? DELEGATE : ON, nodeList, image;
 
         if (filter) {
-            method = 'delegate';
+            method = DELEGATE;
             if (!Y.Lang.isString(filter)) {
                 throw new Error('only string filter is supported');
             }
             nodeList = node.all(filter);
         } else {
-            method = 'on';
+            method = ON;
             nodeList = new Y.NodeList(node);
         }
 
@@ -86,7 +88,7 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detach: function (node, subscription) {
-        this._detach(subscription, 'on');
+        this._detach(subscription, ON);
     },
 
     delegate: function (node, subscription, notifier, filter) {
@@ -94,6 +96,6 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detachDelegate: function (node, subscription) {
-        this._detach(subscription, 'delegate');
+        this._detach(subscription, DELEGATE);
     }
 });
