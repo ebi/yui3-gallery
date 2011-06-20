@@ -70,12 +70,6 @@ Y.Event.define(EVENT_TYPE, {
         this._checkImages(subscription, notifier);
     },
 
-    _attachImageListeners: function (subscription, notifier, image) {
-        var imageInstance = new Image();
-        imageInstance.onload = Y.bind(this._checkImages, this, subscription, notifier);
-        imageInstance.src = image.get('src');
-    },
-
     _detach: function (subscription) {
         Y.each(subscription._handles, function (handle) {
             handle.detach();
