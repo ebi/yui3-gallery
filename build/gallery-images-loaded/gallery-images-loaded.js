@@ -7,12 +7,10 @@ YUI.add('gallery-images-loaded', function(Y) {
 */
 
 var EVENT_TYPE = 'images:loaded',
-    COMPLETE = 'complete',
-    DELEGATE = 'delegate',
-    ON = 'on';
+    COMPLETE = 'complete';
 
 /**
- * Provides a subscribable event named &quot;beacon:reached&quot;.
+ * Provides a subscribable event named &quot;images:loaded&quot;.
  *
  * @event images:loaded
  * @param type {String} 'images:loaded'
@@ -26,17 +24,15 @@ var EVENT_TYPE = 'images:loaded',
 
 Y.Event.define(EVENT_TYPE, {
     _attach: function (node, subscription, notifier, filter) {
-        var method, nodeList;
+        var nodeList;
+        subscription._images = [];
 
         if (filter) {
-            method = DELEGATE;
             nodeList = node.all(filter);
         } else {
-            method = ON;
             nodeList = new Y.NodeList(node);
         }
 
-        subscription._images = [];
         Y.each(nodeList, function (subscriptionNode) {
             if ('IMG' === subscriptionNode.get('nodeName')) {
                 if (false === subscriptionNode.get(COMPLETE)) {
@@ -88,7 +84,7 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detach: function (node, subscription) {
-        this._detach(subscription, ON);
+        this._detach(subscription, 'on');
     },
 
     delegate: function (node, subscription, notifier, filter) {
@@ -96,7 +92,7 @@ Y.Event.define(EVENT_TYPE, {
     },
 
     detachDelegate: function (node, subscription) {
-        this._detach(subscription, DELEGATE);
+        this._detach(subscription, 'delegate');
     }
 });
 
