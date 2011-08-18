@@ -19,7 +19,6 @@ var PX = 'px',
         E_CROWN = 'Crown',
         E_NE = 'NE',
         E_NW = 'NW',
-        E_CROWN = 'Crown',
         PAGE_DEF_WIDTH = 960,
         NW_MIN_WIDTH = 150,
         DEF_MAIN_HEIGHT = 700,
@@ -40,7 +39,7 @@ var PX = 'px',
         IMG_CLOSE_TPL = '/>',
         BORDERS_COLOR = POUND + '99cccc',
         BORDER_PIX_IMG = 'pix-blue.gif',
-        BORDER_PIX_URL = PATH_TO_IMAGES + BORDER_PIX_IMG,
+        BORDER_PIX_URL = BORDER_PIX_IMG,
         FULL_DESKTOP = {
             wrapper: 'page_wrapper',
             crown: 'crown',
@@ -212,7 +211,7 @@ Corresponding nodes are fetched after configuration based on updated selector
                 i,
                 HANDLE_IMG_URL = BASE_URL + PATH_TO_IMAGES + HANDLE_IMG;
                 
-            HANDLE_IMG_TPL = IMG_OPEN_TPL + ID_OPEN_TPL + DEF_PREFIX + HANDLE_ID + ID_CLOSE_TPL + SRC_OPEN_TPL + HANDLE_IMG_URL + SRC_CLOSE_TPL + IMG_CLOSE_TPL
+            HANDLE_IMG_TPL = IMG_OPEN_TPL + ID_OPEN_TPL + DEF_PREFIX + HANDLE_ID + ID_CLOSE_TPL + SRC_OPEN_TPL + HANDLE_IMG_URL + SRC_CLOSE_TPL + IMG_CLOSE_TPL;
             
             Y.log('HANDLE_IMG_TPL ' + HANDLE_IMG_TPL, 'info', SplitDesktop.NAME);
             for (i in config) {
@@ -250,10 +249,9 @@ In case we have fullpath => assume js file is inside root of package basedir (Y.
                         DRAG_HERE_IMG_URL = this.get(PATH_TO_IMAGES_CONF) + this.get(DRAG_HERE_IMG_CONF);
                         Y.one(POUND + DEF_PREFIX + FULL_DESKTOP.main).setStyle(BACKGROUNDIMAGE, 'url("' + DRAG_HERE_IMG_URL + '")');
 
-                        BORDER_PIX_URL = this.get(PATH_TO_IMAGES_CONF) + this.get(BORDER_PIX_CONF);
-
                         if (i === BORDER_PIX_CONF || i === PATH_TO_IMAGES_CONF) {
-                            Y.one(POUND + DEF_PREFIX + FULL_DESKTOP.nw).setStyle(BACKGROUNDIMAGE, BORDER_PIX_URL);
+                        	BORDER_PIX_URL = this.get(PATH_TO_IMAGES_CONF) + this.get(BORDER_PIX_CONF);
+                            Y.one(POUND + DEF_PREFIX + FULL_DESKTOP.nw).setStyle(BACKGROUNDIMAGE, 'url("' + BORDER_PIX_URL + '")');
                         }
                         /* create handle and place it in resizer div */
                         if (i === HANDLE_IMG_CONF || i === PATH_TO_IMAGES_CONF) {
@@ -458,7 +456,7 @@ hence the current x y is not necessarily at the bottom left corner of the window
                 
         _getBaseUrl : function () {
             Y.log("setting baseurl. Dumping config if Y.dump is present", 'info', SplitDesktop.NAME);
-           if(Y.dump){ Y.log(Y.dump(Y.config))};
+           if(Y.dump){ Y.log(Y.dump(Y.config));}
             if(Y.config.modules){
                 if(Y.config.modules[GALLERYSPLITDESKTOP]){
                     /* defined as single module */
@@ -487,7 +485,7 @@ hence the current x y is not necessarily at the bottom left corner of the window
                 //extract root, assets relative to root
                 var url = Y.config.fullpath;
                 Y.log("Baseurl based on general fullpath", 'info', SplitDesktop.NAME);
-                return url.substring(0,lastIndexOf('/',url)+1);
+                return url.substring(0,url.lastIndexOf('/')+1);
                 
             }else{
                 Y.log("Baseurl based on fallback path", 'info', SplitDesktop.NAME);
@@ -552,7 +550,7 @@ hence the current x y is not necessarily at the bottom left corner of the window
                 secondaryNode.setStyle(HEIGHT, val);
             }
             handleImgNode.setStyle('bottom', '0px');
-            handleImgNode.setStyle('top', '')
+            handleImgNode.setStyle('top', '');
             
         }
 
