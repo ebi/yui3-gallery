@@ -100,6 +100,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         this._set('keyHandle', handle);
 
         overlay.show();
+        this.refresh();
     },
 
     /**

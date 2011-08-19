@@ -101,6 +101,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         this._set('keyHandle', handle);
 
         overlay.show();
+        this.refresh();
     },
 
     /**
@@ -206,4 +207,4 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
 });
 
 
-}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize'], skinnable:true});
+}, '@VERSION@' ,{skinnable:true, requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize']});
