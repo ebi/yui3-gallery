@@ -88,7 +88,7 @@ YUI().use('node', 'node-event-simulate', 'gallery-dispatcher', 'gallery-overlay-
             assertCalledWithExactly(Y.Overlay, {
                 srcNode: ob.get('container'),
                 zIndex: 99,
-                centered: true,
+                centered: ob.get('greyOverlay'),
                 plugins: [ Y.Plugin.OverlayKeepaligned ]
             });
         },

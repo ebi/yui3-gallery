@@ -85,7 +85,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             overlay = new Y.Overlay({
                 srcNode: this.get('container'),
                 zIndex: this.get('zIndex'),
-                centered: true,
+                centered: this.get('greyOverlay'),
                 plugins: [ Y.Plugin.OverlayKeepaligned ]
             });
             overlay.render();
