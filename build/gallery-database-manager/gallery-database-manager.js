@@ -1,3 +1,5 @@
+YUI.add('gallery-database-manager', function(Y) {
+
 /*jslint white: true, onevar: true, browser: true, undef: true, nomen: false, regexp: true, plusplus: true, bitwise: true, newcap: true, maxerr: 50, indent: 4 */
 /*global Y, openDatabase, window, localStorage*/
 'use strict';
@@ -23,15 +25,11 @@ var DBMANAGER = 'DatabaseManager',
 
 function errorHandler(tx, error) {
     if (l.isUndefined(tx)) {
-        Y.log('Got no transaction variable for error logging', 'error', DBMANAGER);
     } else {
-        Y.log(tx, 'error', DBMANAGER);
     }
 
     if (l.isUndefined(error)) {
-        Y.log('No error given (or probably no transaction if the error just got logged', 'error', DBMANAGER);
     } else {
-        Y.log(error, 'error', DBMANAGER);
     }
 }
 
@@ -48,11 +46,8 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
         if (this._allowsDBAccess()) {
             try {
                 db = openDatabase(this.get(ATTR_DBNAME), '', this.get(ATTR_DBDESC), this.get(ATTR_DBSIZE));
-                Y.log('Database opened for writing', 'info', DBMANAGER);
                 if (db.version !== DBVERSION) {
-                    Y.log('Database has a different version than expected', 'warn', DBMANAGER);
                     if ('' === db.version) {
-                        Y.log('Database gets initialized', 'info', DBMANAGER);
                         db.changeVersion(db.version, DBVERSION, function (tx) {
                             //Initialize the DB
                             tx.executeSql('CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, timeWritten INTEGER, lifetime INTEGER);');
@@ -82,7 +77,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
         lifetime = lifetime || this.get(ATTR_LIFETIME);
         var record = [key, value, Date.now(), lifetime];
         this.get(ATTR_HANDLE).transaction(function (tx) {
-            Y.log('Writing key "' + key + '" with value "' + value + '" and lifetime "' + lifetime + '"', 'info', DBMANAGER);
             tx.executeSql('REPLACE INTO ' + DBTABLE + ' (id, value, timeWritten, lifetime) VALUES (:id, :value, :timeWritten, :lifetime);', record, null, errorHandler);
         });
     },
@@ -113,7 +107,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
                     callback.call(callback, null);
                     return;
                 }
-                Y.log('Read key "' + key + '" for value "' + item.value + '"', 'info', DBMANAGER);
                 callback.call(callback, item.value);
             }, errorHandler);
         });
@@ -126,14 +119,11 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
      */
     _disableDBAccess: function () {
         var name = this.get(ATTR_DISABLED);
-        Y.log('The user disallowed access to the Database', 'warn', DBMANAGER);
         try {
             localStorage.setItem(name, DISABLED);
-            Y.log('Disabling future access by setting localStorage entry: ' + name, 'info', DBMANAGER);
         } catch (e) {
             //If localStorage is not available we use cookies
             Y.Cookie.set(name, DISABLED);
-            Y.log('Disabling future access by setting cookie: ' + name, 'info', DBMANAGER);
         }
     },
 
@@ -144,7 +134,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
      */
     _allowsDBAccess: function () {
         if (!!window.openDatabase) {
-            Y.log('Database found', 'info', DBMANAGER);
             //The user has a DB now we want to know if we disabled access because he declined it
             try {
                 if (null === localStorage.getItem(this.get(ATTR_DISABLED))) {
@@ -152,14 +141,12 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
                     return this._allowsDBAccessByCookie();
                 } else {
                     //We do this only to get a nice log entry
-                    Y.log('Database disabled by localStorage entry: ' + this.get(ATTR_DISABLED), 'info', DBMANAGER);
                     return false;
                 }
             } catch (e) {
                 return this._allowsDBAccessByCookie();
             }
         }
-        Y.log('Database not found', 'info', DBMANAGER);
         return false;
     },
 
@@ -172,7 +159,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
         if (null === Y.Cookie.get(this.get(ATTR_DISABLED))) {
             return true;
         }
-        Y.log('Database disabled by cookie', 'info', DBMANAGER);
         return false;
     }
 }, {
@@ -220,3 +206,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
         }
     }
 });
+
+
+}, '@VERSION@' ,{requires:['base', 'cookie']});

@@ -1,3 +1,5 @@
+YUI.add('gallery-database-manager', function(Y) {
+
 /*jslint white: true, onevar: true, browser: true, undef: true, nomen: false, regexp: true, plusplus: true, bitwise: true, newcap: true, maxerr: 50, indent: 4 */
 /*global Y, openDatabase, window, localStorage*/
 'use strict';
@@ -220,3 +222,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
         }
     }
 });
+
+
+}, '@VERSION@' ,{requires:['base', 'cookie']});
