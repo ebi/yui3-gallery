@@ -15,7 +15,7 @@ config['Browser tests'] = {
 		'test/yui3/pluginhost-config/pluginhost-config-min.js',
 		'test/yui3/base-pluginhost/base-pluginhost-min.js',
 		'test/yui3/base-build/base-build-min.js',
-		'build_tmp/gallery-database-manager.js'
+		'build_tmp/gallery-database-manager-debug.js'
 	],
 	tests: ['test/*-test.js']
 };

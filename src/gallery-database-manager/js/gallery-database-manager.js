@@ -1,4 +1,4 @@
-/*jslint white: true, onevar: true, browser: true, undef: true, nomen: false, regexp: true, plusplus: true, bitwise: true, newcap: true, maxerr: 50, indent: 4 */
+/*jslint nomen: false, indent: 4 */
 /*global Y, openDatabase, window, localStorage*/
 'use strict';
 
@@ -19,7 +19,9 @@ var DBMANAGER = 'DatabaseManager',
 	ATTR_DBSIZE = 'databaseSize',
 	ATTR_LIFETIME = 'defaultLifetime',
 	ATTR_LIFETIME_CHECK = 'checkLifetime',
-	ATTR_DISABLED = 'dbDisabledPropertyName';
+	ATTR_DISABLED = 'dbDisabledPropertyName',
+	ATTR_ALLOWED = 'allowsAccess',
+	ATTR_HASDB = 'supportsDB';
 
 function errorHandler(tx, error) {
 	if (l.isUndefined(tx)) {
@@ -45,7 +47,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	initializer: function (config) {
 		config = config || {};
 		var db = null;
-		if (this._allowsDBAccess()) {
+		if (this.get(ATTR_ALLOWED)) {
 			try {
 				db = openDatabase(this.get(ATTR_DBNAME), '', this.get(ATTR_DBDESC), this.get(ATTR_DBSIZE));
 				Y.log('Database opened for writing', 'info', DBMANAGER);
@@ -127,6 +129,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	_disableDBAccess: function () {
 		var name = this.get(ATTR_DISABLED);
 		Y.log('The user disallowed access to the Database', 'warn', DBMANAGER);
+		this._set(ATTR_ALLOWED, false);
 		try {
 			localStorage.setItem(name, DISABLED);
 			Y.log('Disabling future access by setting localStorage entry: ' + name, 'info', DBMANAGER);
@@ -138,12 +141,21 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	},
 
 	/**
+	 * Returns if the client supports database
+	 *
+	 * @return {Boolean} True if it generally supports DBs
+	 */
+	_supportsDB: function () {
+		return !!window.openDatabase;
+	},
+
+	/**
 	 * Returns if the client supports database and allowed the size you asked for while creating
 	 *
 	 * @return {Boolean} true if access is possible
 	 */
 	_allowsDBAccess: function () {
-		if (!!window.openDatabase) {
+		if (this.get(ATTR_HASDB)) {
 			Y.log('Database found', 'info', DBMANAGER);
 			//The user has a DB now we want to know if we disabled access because he declined it
 			try {
@@ -217,6 +229,16 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 
 		dbDisabledPropertyName: {
 			value: DBMANAGER + 'disabledDB'
+		},
+
+		allowsAccess: {
+			valueFn: '_allowsDBAccess',
+			readOnly: true
+		},
+
+		supportsDB: {
+			valueFn: '_supportsDB',
+			readOnly: true
 		}
 	}
 });
