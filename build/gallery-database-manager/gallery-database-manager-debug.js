@@ -163,6 +163,23 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	},
 
 	/**
+	 * Removes the item with the given key from the database
+	 *
+	 * @param {String} key The key of the item which will be deleted
+	 * @return {Void}
+	 */
+	removeItem: function (key) {
+		if (!this.get(ATTR_HANDLE)) {
+			return;
+		}
+		this.get(ATTR_HANDLE).transaction(function (tx) {
+			var sqlStr = 'DELETE FROM ' + DBTABLE + " WHERE id = :key;";
+			Y.log(sqlStr);
+			tx.executeSql(sqlStr, [key], null, errorHandler);
+		});
+	},
+
+	/**
 	 * Remembers that the client didn't allow to create the DB and disables it
 	 *
 	 * @return {Void}

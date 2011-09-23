@@ -179,6 +179,16 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 					assert.calledWithExactly(this.callback, item);
 				}
 			}
+		},
+
+		"removeItem": function () {
+			var db = getDB();
+
+			db.removeItem(SOMEKEY);
+
+			sqlExpect = 'DELETE FROM ' + DBTABLE + " WHERE id = :key;";
+			assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
+			assert.equals([SOMEKEY], this.txStub.executeSql.getCall(1).args[1]);
 		}
 	};
 
