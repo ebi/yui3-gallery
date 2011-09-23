@@ -23,6 +23,7 @@ var DBMANAGER = 'DatabaseManager',
 	ATTR_LIFETIME_CHECK = 'checkLifetime',
 	ATTR_DISABLED = 'dbDisabledPropertyName',
 	ATTR_ALLOWED = 'allowsAccess',
+	ATTR_CUSTOM = 'customFields',
 	ATTR_HASDB = 'supportsDB';
 
 function errorHandler(tx, error) {
@@ -48,18 +49,24 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 **/
 	initializer: function (config) {
 		config = config || {};
-		var db = null;
+		var db = null, customFields;
 		if (this.get(ATTR_ALLOWED)) {
 			try {
-				db = openDatabase(this.get(ATTR_DBNAME), '', this.get(ATTR_DBDESC), this.get(ATTR_DBSIZE));
+				db = this._getDatabase(this.get(ATTR_DBNAME), '', this.get(ATTR_DBDESC), this.get(ATTR_DBSIZE));
 				Y.log('Database opened for writing', 'info', DBMANAGER);
 				if (db.version !== DBVERSION) {
 					Y.log('Database has a different version than expected', 'warn', DBMANAGER);
 					if ('' === db.version) {
+						customFields = this.get(ATTR_CUSTOM);
 						Y.log('Database gets initialized', 'info', DBMANAGER);
 						db.changeVersion(db.version, DBVERSION, function (tx) {
 							//Initialize the DB
-							tx.executeSql('CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, timeWritten INTEGER, lifetime INTEGER);');
+							var sqlStr = 'CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, ';
+							Y.each(customFields, function (field) {
+								sqlStr += field.name + ' ' + field.type + ', ';
+							});
+							sqlStr += 'timeWritten INTEGER, lifetime INTEGER);';
+							tx.executeSql(sqlStr);
 						}, function () {}, errorHandler); //The iPad expects tbe empty function or will throw an error
 					}
 				}
@@ -68,6 +75,26 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			}
 		}
 		this._set(ATTR_HANDLE, db);
+	},
+
+	/**
+	 * Returns a database handle
+	 *
+	 * @param {String} name of the Database
+	 * @param {String} version of the Database
+	 * @param {String} description of the Database
+	 * @param {Number} size estimation for the Database
+	 * @returns {Object} DatabaseHandle
+	 **/
+	_getDatabase: function (name, version, description, size) {
+		return openDatabase(name, version, description, size);
+	},
+
+	/**
+	 * Returns a date that can easily be replaced
+	 **/
+	_getNow: function () {
+		return Date.now();
 	},
 
 	/**
@@ -84,10 +111,21 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 		}
 
 		lifetime = lifetime || this.get(ATTR_LIFETIME);
-		var record = [key, value, Date.now(), lifetime];
+		var record = [key],
+			customFields = this.get(ATTR_CUSTOM);
+		record = record.concat(value, this._getNow(), lifetime);
 		this.get(ATTR_HANDLE).transaction(function (tx) {
-			Y.log('Writing key "' + key + '" with value "' + value + '" and lifetime "' + lifetime + '"', 'info', DBMANAGER);
-			tx.executeSql('REPLACE INTO ' + DBTABLE + ' (id, value, timeWritten, lifetime) VALUES (:id, :value, :timeWritten, :lifetime);', record, null, errorHandler);
+			var additionalPlaceHolders = '', sqlStr = '';
+
+			sqlStr = 'REPLACE INTO ' + DBTABLE + ' (id, value, ';
+			Y.each(customFields, function (field) {
+				additionalPlaceHolders += '?, ';
+				sqlStr += field.name + ', ';
+			});
+			sqlStr += 'timeWritten, lifetime) VALUES (?, ?, ' + additionalPlaceHolders + '?, ?);';
+			Y.log(sqlStr);
+			Y.log(record);
+			tx.executeSql(sqlStr, record, null, errorHandler);
 		});
 	},
 
@@ -100,6 +138,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * @return {Void}
 	 */
 	getItem: function (key, callback, checkLifetime) {
+		var time = this._getNow();
 		if (!this.get(ATTR_HANDLE)) {
 			callback.call(callback, null);
 			return;
@@ -111,14 +150,14 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 					callback.call(callback, null);
 					return;
 				}
-				var item = results.rows.item(0), time = Date.now();
+				var item = results.rows.item(0);
 				if (checkLifetime && 0 < item.lifetime && time > (time + item.lifetime)) {
 					//TODO: Delete the item from the DB
 					callback.call(callback, null);
 					return;
 				}
 				Y.log('Read key "' + key + '" for value "' + item.value + '"', 'info', DBMANAGER);
-				callback.call(callback, item.value);
+				callback.call(callback, item);
 			}, errorHandler);
 		});
 	},
@@ -201,12 +240,6 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			writeOnce: 'initOnly'
 		},
 
-		databaseTableName: {
-			value: 'keyValueStore',
-			validator: isString,
-			writeOnce: 'initOnly'
-		},
-
 		databaseSize: {
 			value: 5 * 1024 * 1024,
 			validator: l.isNumber,
@@ -241,6 +274,10 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 		supportsDB: {
 			valueFn: '_supportsDB',
 			readOnly: true
+		},
+
+		customFields: {
+			value: []
 		}
 	}
 });
