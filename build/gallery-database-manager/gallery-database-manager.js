@@ -129,7 +129,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * @return {Void}
 	 */
 	getItem: function (key, callback, checkLifetime) {
-		var time = this._getNow();
+		var time = this._getNow(), dbm = this;
 		if (!this.get(ATTR_HANDLE)) {
 			callback.call(callback, null);
 			return;
@@ -142,8 +142,8 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 					return;
 				}
 				var item = results.rows.item(0);
-				if (checkLifetime && 0 < item.lifetime && time > (time + item.lifetime)) {
-					//TODO: Delete the item from the DB
+				if (checkLifetime && 0 < item.lifetime && time > (item.timeWritten + item.lifetime)) {
+					dbm.removeItem(key);
 					callback.call(callback, null);
 					return;
 				}

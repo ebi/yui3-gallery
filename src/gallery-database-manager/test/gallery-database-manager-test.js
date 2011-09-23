@@ -178,6 +178,63 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 					assert.calledOnce(this.callback);
 					assert.calledWithExactly(this.callback, item);
 				}
+			},
+
+			"expiredLifetime": {
+				setUp: function () {
+					this.stub(Y.DatabaseManager.prototype, 'removeItem');
+					this.db = getDB();
+				},
+
+				"expired item": {
+					setUp: function () {
+						var item = { lifetime: 1, value: SOMEVALUE, timeWritten: TIMEWRITTEN - 2, flag: SOMEFLAG, hash: SOMEHASH};
+						this.txStub.executeSql.callsArgWith(2, this.stub(), {
+							rows: {
+								length: 1,
+								item: this.stub().returns(item)
+						}});
+					},
+
+					"delete": function () {
+						this.db.getItem(SOMEKEY, this.spy(), true);
+
+						assert.calledOnce(this.db.removeItem);
+						assert.calledWithExactly(this.db.removeItem, SOMEKEY);
+					},
+
+					"don't delete if lifetimeCheck is false": function () {
+						this.db.getItem(SOMEKEY, this.spy(), false);
+
+						assert.notCalled(this.db.removeItem);
+					}
+				},
+
+				"don't delete if lifetime is 0": function () {
+					var item = { lifetime: 0, value: SOMEVALUE, timeWritten: TIMEWRITTEN - 2, flag: SOMEFLAG, hash: SOMEHASH};
+					this.txStub.executeSql.callsArgWith(2, this.stub(), {
+						rows: {
+							length: 1,
+							item: this.stub().returns(item)
+					}});
+
+					this.db.getItem(SOMEKEY, this.spy(), true);
+
+					assert.notCalled(this.db.removeItem);
+				},
+
+				"don't delete unexpired item": function () {
+					var item = { lifetime: 2, value: SOMEVALUE, timeWritten: TIMEWRITTEN - 2, flag: SOMEFLAG, hash: SOMEHASH};
+					this.txStub.executeSql.callsArgWith(2, this.stub(), {
+						rows: {
+							length: 1,
+							item: this.stub().returns(item)
+					}});
+
+					this.db.getItem(SOMEKEY, this.spy(), true);
+
+					assert.notCalled(this.db.removeItem);
+				}
 			}
 		},
 
