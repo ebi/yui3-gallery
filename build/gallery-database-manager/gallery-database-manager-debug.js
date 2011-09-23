@@ -69,6 +69,8 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 							tx.executeSql(sqlStr);
 						}, function () {}, errorHandler); //The iPad expects tbe empty function or will throw an error
 					}
+				} else {
+					this.removeExpired();
 				}
 			} catch (e) {
 				this._disableDBAccess();
@@ -176,6 +178,23 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			var sqlStr = 'DELETE FROM ' + DBTABLE + " WHERE id = :key;";
 			Y.log(sqlStr);
 			tx.executeSql(sqlStr, [key], null, errorHandler);
+		});
+	},
+
+	/**
+	 * Removes all expired items from the database
+	 *
+	 * @return {Void}
+	 */
+	removeExpired: function () {
+		var time = this._getNow();
+		if (!this.get(ATTR_HANDLE)) {
+			return;
+		}
+		this.get(ATTR_HANDLE).transaction(function (tx) {
+			var sqlStr = 'DELETE FROM ' + DBTABLE + " WHERE 0 < lifetime AND :time > (timeWritten + lifetime);";
+			Y.log(sqlStr);
+			tx.executeSql(sqlStr, [time], null, errorHandler);
 		});
 	},
 

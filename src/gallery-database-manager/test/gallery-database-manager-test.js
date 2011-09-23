@@ -76,6 +76,17 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 				assert.calledOnce(this.txStub.executeSql);
 				assert.calledWithExactly(this.txStub.executeSql, 'CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, flag INTEGER, hash TEXT, timeWritten INTEGER, lifetime INTEGER);');
+			},
+
+			"existing DB": function () {
+				Y.DatabaseManager.prototype._getDatabase.returns({
+					version: '1'
+				});
+				this.stub(Y.DatabaseManager.prototype, 'removeExpired');
+
+				var db = getDB();
+
+				assert.called(db.removeExpired);
 			}
 		},
 
@@ -246,6 +257,16 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 			sqlExpect = 'DELETE FROM ' + DBTABLE + " WHERE id = :key;";
 			assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
 			assert.equals([SOMEKEY], this.txStub.executeSql.getCall(1).args[1]);
+		},
+
+		"removeExpired": function () {
+			var db = getDB();
+
+			db.removeExpired();
+
+			sqlExpect = 'DELETE FROM ' + DBTABLE + " WHERE 0 < lifetime AND :time > (timeWritten + lifetime);";
+			assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
+			assert.equals([TIMEWRITTEN], this.txStub.executeSql.getCall(1).args[1]);
 		}
 	};
 
