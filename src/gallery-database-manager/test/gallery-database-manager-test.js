@@ -24,7 +24,11 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 				type: 'TEXT'
 			}
 		],
-		CUSTOMVALUE = [SOMEVALUE, SOMEFLAG, SOMEHASH];
+		CUSTOMVALUE = {
+			value: SOMEVALUE,
+			hash: SOMEHASH,
+			flag: SOMEFLAG
+		};
 
 
 
@@ -118,6 +122,24 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 				assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
 				assert.equals([SOMEKEY, SOMEVALUE, SOMEFLAG, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
+			},
+
+			"some custom fields set": function () {
+				var db = getDB({
+						customFields: CUSTOMFIELDS
+					}),
+					sqlExpect = '',
+					someValues = Y.mix(CUSTOMVALUE);
+
+				delete(someValues.flag);
+				db.setItem(SOMEKEY, someValues, LIFETIME);
+
+				assert.called(this.txStub.executeSql);
+				sqlExpect = 'REPLACE INTO ' + DBTABLE;
+				sqlExpect += ' (id, value, hash, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?);';
+
+				assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
+				assert.equals([SOMEKEY, SOMEVALUE, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
 			}
 		},
 

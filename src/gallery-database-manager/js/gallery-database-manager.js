@@ -101,7 +101,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * Sets an item to the given Value
 	 *
 	 * @param {String} key The name under which it will be stored.
-	 * @param {String} value Can be any string.
+	 * @param {Mixed} value If it's a string the additional fields will be empty. If it's an object it will only set the provided fields;
 	 * @param {Number} lifetime Overwrites the default lifetime.
 	 * @return {Void}
 	 */
@@ -112,17 +112,26 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 
 		lifetime = lifetime || this.get(ATTR_LIFETIME);
 		var record = [key],
-			customFields = this.get(ATTR_CUSTOM);
-		record = record.concat(value, this._getNow(), lifetime);
-		this.get(ATTR_HANDLE).transaction(function (tx) {
-			var additionalPlaceHolders = '', sqlStr = '';
+			additionalPlaceHolders = '',
+			sqlStr = '';
 
-			sqlStr = 'REPLACE INTO ' + DBTABLE + ' (id, value, ';
-			Y.each(customFields, function (field) {
-				additionalPlaceHolders += '?, ';
-				sqlStr += field.name + ', ';
+		sqlStr = 'REPLACE INTO ' + DBTABLE + ' (id, value, ';
+		//Build Records array from custom Fields and normal values.
+		if (isString(value)) {
+			record.push(value);
+		} else {
+			record.push(value.value);
+			Y.each(this.get(ATTR_CUSTOM), function (field) {
+				if (! l.isUndefined(value[field.name])) {
+					sqlStr += field.name + ', ';
+					additionalPlaceHolders += '?, ';
+					record.push(value[field.name]);
+				}
 			});
-			sqlStr += 'timeWritten, lifetime) VALUES (?, ?, ' + additionalPlaceHolders + '?, ?);';
+		}
+		record.push(this._getNow(), lifetime);
+		sqlStr += 'timeWritten, lifetime) VALUES (?, ?, ' + additionalPlaceHolders + '?, ?);';
+		this.get(ATTR_HANDLE).transaction(function (tx) {
 			Y.log(sqlStr);
 			Y.log(record);
 			tx.executeSql(sqlStr, record, null, errorHandler);
