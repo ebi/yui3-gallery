@@ -1,0 +1,188 @@
+.buster-test,
+html.buster-test {
+    margin: 0;
+    padding: 0;
+}
+
+.buster-test,
+body.buster-test {
+    font-family: Georgia, Times, serif;
+    font-size: 16px;
+    padding: 0 12px;
+}
+
+.buster-test h2 {
+    display: inline-block;
+    font-weight: normal;
+    margin: 0 0 0.25em;
+}
+
+.buster-test ul {
+    margin: 0 0 1em 2em;
+    padding: 0;
+}
+
+.buster-test ul + ul {
+    margin-top: -1em;
+}
+
+.buster-test ul li {
+    list-style: none;
+}
+
+.buster-test li h3 {
+    display: inline-block;
+    font-size: 1.2em;
+    margin: 0 0 .25em;
+    padding: 0;
+}
+
+.buster-test li ul,
+.buster-test li p {
+    margin: 0 0 0.5em 2em;
+}
+
+.buster-test .success h3:before {
+    color: #3c3;
+    content: "✓";
+    padding-right: 6px;
+}
+
+.buster-test .timeout h3,
+.buster-test .failure h3,
+.buster-test .error-message {
+    color: #c33;
+}
+
+.buster-test .error h3,
+.buster-test .error .error-message {
+    color: #cc3;
+}
+
+.buster-test .failure h3:before,
+.buster-test .error h3:before {
+    content: "✖";
+    padding-right: 6px;
+}
+
+.buster-test .deferred h3 {
+    color: #33c;
+}
+
+.buster-test .deferred h3:before {
+    content: "✎";
+    padding-right: 6px;
+}
+
+.buster-test .stats ul {
+    margin: 0 0 1em;
+}
+
+.buster-test .stats h2 {
+    margin: 0 0 .25em;
+}
+
+.buster-test .stats li {
+    display: inline;
+    padding-right: 1em;
+}
+
+.buster-test p,
+.buster-test li {
+    line-height: 1.5;
+}
+
+.buster-test h1,
+.buster-test h2,
+.buster-test h3,
+.buster-test h4,
+.buster-test h5,
+.buster-test h6,
+.buster-test p {
+    font-weight: normal;
+    margin: 0 0 1em;
+}
+
+.buster-test ul {
+    margin: 0 0 1em 15px;
+}
+
+/* Masthead */
+.buster-test h1 {
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.buster-test h1 {
+    background: #333;
+
+    background: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        from(#5f5f5f),
+        to(#222)
+    );
+
+    background: -moz-linear-gradient(
+        top center,
+        #5f5f5f,
+        #222
+    );
+
+    /* For Internet Explorer 5.5 - 7 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ff5f5f5f, endColorstr=#ff222222);
+    /* For Internet Explorer 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#ff5f5f5f, endColorstr=#ff222222)";
+
+    border-bottom: 4px solid #c0c6cc;
+    box-shadow: 0 0 10px #ddd;
+    -moz-box-shadow: 0 0 10px #ddd;
+    -webkit-box-shadow: 0 0 10px #ddd;
+    color: #fff;
+    padding: 6px 12px;
+    margin: 0 -12px 1em;
+}
+
+.buster-test h1 a {
+    color: #fff;
+    padding-right: 1em;
+    text-decoration: none;
+}
+
+.buster-test h1 span {
+    color: #a7a7a7;
+    padding-right: 1em;
+}
+
+.buster-test .messages li:before {
+    background: #f0f0f0;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border: 1px solid #ccc;
+    display: inline-block;
+    font-family: monospace;
+    font-size: 10px;
+    font-variant: small-caps;
+    margin-right: 1em;
+    padding: 0 4px;
+}
+
+.buster-test .log:before {
+    content: "LOG";
+}
+
+.buster-test .info:before {
+    content: "INFO";
+}
+
+.buster-test .messages .warn:before {
+    content: "WARN";
+    border-color: #cc3;
+}
+
+.buster-test .messages .error:before {
+    content: "ERR";
+    border-color: #c00;
+}
