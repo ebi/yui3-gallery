@@ -75,11 +75,11 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 			"create the db with custom fields": function () {
 				var db = getDB({
-					customFields: CUSTOMFIELDS
+					customFields: Y.Array(CUSTOMFIELDS)
 				});
 
 				assert.calledOnce(this.txStub.executeSql);
-				assert.calledWithExactly(this.txStub.executeSql, 'CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, flag INTEGER, hash TEXT, timeWritten INTEGER, lifetime INTEGER);');
+				assert.calledWithExactly(this.txStub.executeSql, 'CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, flag INTEGER, hash TEXT, value BLOB, timeWritten INTEGER, lifetime INTEGER);');
 			},
 
 			"existing DB": function () {
@@ -110,7 +110,7 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 			"customFields": function () {
 				var db = getDB({
-						customFields: CUSTOMFIELDS
+						customFields: Y.Array(CUSTOMFIELDS)
 					}),
 					sqlExpect = '';
 
@@ -118,46 +118,46 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 				assert.called(this.txStub.executeSql);
 				sqlExpect = 'REPLACE INTO ' + DBTABLE;
-				sqlExpect += ' (id, value, flag, hash, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?, ?);';
+				sqlExpect += ' (id, flag, hash, value, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?, ?);';
 
 				assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
-				assert.equals([SOMEKEY, SOMEVALUE, SOMEFLAG, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
+				assert.equals([SOMEKEY, SOMEFLAG, SOMEHASH, SOMEVALUE, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
 			},
 
 			"some custom fields set": function () {
 				var db = getDB({
-						customFields: CUSTOMFIELDS
+						customFields: Y.Array(CUSTOMFIELDS)
 					}),
 					sqlExpect = '',
-					someValues = Y.mix(CUSTOMVALUE);
+					someValues = Y.merge(CUSTOMVALUE);
 
 				delete(someValues.flag);
 				db.setItem(SOMEKEY, someValues, LIFETIME);
 
 				assert.called(this.txStub.executeSql);
 				sqlExpect = 'REPLACE INTO ' + DBTABLE;
-				sqlExpect += ' (id, value, hash, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?);';
+				sqlExpect += ' (id, hash, value, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?);';
 
 				assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
-				assert.equals([SOMEKEY, SOMEVALUE, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
+				assert.equals([SOMEKEY, SOMEHASH, SOMEVALUE, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
 			},
 
 			"some custom fields but no value": function () {
 				var db = getDB({
-						customFields: CUSTOMFIELDS
+						customFields: Y.Array(CUSTOMFIELDS)
 					}),
 					sqlExpect = '',
-					someValues = Y.mix(CUSTOMVALUE);
+					someValues = Y.merge(CUSTOMVALUE);
 
 				delete(someValues.value);
 				db.setItem(SOMEKEY, someValues, LIFETIME);
 
 				assert.called(this.txStub.executeSql);
 				sqlExpect = 'REPLACE INTO ' + DBTABLE;
-				sqlExpect += ' (id, hash, flag, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?);';
+				sqlExpect += ' (id, flag, hash, timeWritten, lifetime) VALUES (?, ?, ?, ?, ?);';
 
 				assert.equals(sqlExpect, this.txStub.executeSql.getCall(1).args[0]);
-				assert.equals([SOMEKEY, SOMEVALUE, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
+				assert.equals([SOMEKEY, SOMEFLAG, SOMEHASH, TIMEWRITTEN, LIFETIME], this.txStub.executeSql.getCall(1).args[1]);
 			}
 		},
 
@@ -203,7 +203,7 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 			"customFields": {
 				setUp: function () {
 					this.db = getDB({
-						customFields: CUSTOMFIELDS
+						customFields: Y.Array(CUSTOMFIELDS)
 					});
 				},
 

@@ -17,6 +17,7 @@ var DBMANAGER = 'DatabaseManager',
 //Attributes
 	ATTR_HANDLE = 'dbHandle',
 	ATTR_DBNAME = 'databaseName',
+	ATTR_DBTABLE = 'databaseTable',
 	ATTR_DBDESC = 'databaseDescription',
 	ATTR_DBSIZE = 'databaseSize',
 	ATTR_LIFETIME = 'defaultLifetime',
@@ -45,16 +46,17 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 **/
 	initializer: function (config) {
 		config = config || {};
-		var db = null, customFields;
+		var db = null, customFields, table = this.get(ATTR_DBTABLE);
 		if (this.get(ATTR_ALLOWED)) {
 			try {
 				db = this._getDatabase(this.get(ATTR_DBNAME), '', this.get(ATTR_DBDESC), this.get(ATTR_DBSIZE));
+				this.get(ATTR_CUSTOM).push({ name: 'value', type: 'BLOB' });
 				if (db.version !== DBVERSION) {
 					if ('' === db.version) {
 						customFields = this.get(ATTR_CUSTOM);
 						db.changeVersion(db.version, DBVERSION, function (tx) {
 							//Initialize the DB
-							var sqlStr = 'CREATE TABLE ' + DBTABLE + ' (id TEXT PRIMARY KEY, value BLOB, ';
+							var sqlStr = 'CREATE TABLE ' + table + ' (id TEXT PRIMARY KEY, ';
 							Y.each(customFields, function (field) {
 								sqlStr += field.name + ' ' + field.type + ', ';
 							});
@@ -110,12 +112,13 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			additionalPlaceHolders = '',
 			sqlStr = '';
 
-		sqlStr = 'REPLACE INTO ' + DBTABLE + ' (id, value, ';
+		sqlStr = 'REPLACE INTO ' + this.get(ATTR_DBTABLE) + ' (id, ';
 		//Build Records array from custom Fields and normal values.
 		if (isString(value)) {
 			record.push(value);
+			sqlStr += 'value, ';
+			additionalPlaceHolders = '?, ';
 		} else {
-			record.push(value.value);
 			Y.each(this.get(ATTR_CUSTOM), function (field) {
 				if (! l.isUndefined(value[field.name])) {
 					sqlStr += field.name + ', ';
@@ -125,7 +128,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			});
 		}
 		record.push(this._getNow(), lifetime);
-		sqlStr += 'timeWritten, lifetime) VALUES (?, ?, ' + additionalPlaceHolders + '?, ?);';
+		sqlStr += 'timeWritten, lifetime) VALUES (?, ' + additionalPlaceHolders + '?, ?);';
 		this.get(ATTR_HANDLE).transaction(function (tx) {
 			tx.executeSql(sqlStr, record, null, errorHandler);
 		});
@@ -147,7 +150,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 		}
 		checkLifetime = Y.Lang.isUndefined(checkLifetime) ? this.get(ATTR_LIFETIME_CHECK) : checkLifetime;
 		this.get(ATTR_HANDLE).transaction(function (tx) {
-			tx.executeSql('SELECT * FROM ' + DBTABLE + " WHERE id = :key;", [key], function (tx, results) {
+			tx.executeSql('SELECT * FROM ' + dbm.get(ATTR_DBTABLE) + " WHERE id = :key;", [key], function (tx, results) {
 				if (0 === results.rows.length) {
 					callback.call(callback, null);
 					return;
@@ -170,11 +173,12 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * @return {Void}
 	 */
 	removeItem: function (key) {
+		var table = this.get(ATTR_DBTABLE);
 		if (!this.get(ATTR_HANDLE)) {
 			return;
 		}
 		this.get(ATTR_HANDLE).transaction(function (tx) {
-			var sqlStr = 'DELETE FROM ' + DBTABLE + " WHERE id = :key;";
+			var sqlStr = 'DELETE FROM ' + table + " WHERE id = :key;";
 			tx.executeSql(sqlStr, [key], null, errorHandler);
 		});
 	},
@@ -185,12 +189,12 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * @return {Void}
 	 */
 	removeExpired: function () {
-		var time = this._getNow();
+		var time = this._getNow(), table = this.get(ATTR_DBTABLE);
 		if (!this.get(ATTR_HANDLE)) {
 			return;
 		}
 		this.get(ATTR_HANDLE).transaction(function (tx) {
-			var sqlStr = 'DELETE FROM ' + DBTABLE + " WHERE 0 < lifetime AND :time > (timeWritten + lifetime);";
+			var sqlStr = 'DELETE FROM ' + table + " WHERE 0 < lifetime AND :time > (timeWritten + lifetime);";
 			tx.executeSql(sqlStr, [time], null, errorHandler);
 		});
 	},
@@ -264,6 +268,12 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 			value: DBMANAGER,
 			validator: isString,
 			writeOnce: 'initOnly'
+		},
+
+		databaseTable: {
+			value: DBTABLE,
+			validator: isString,
+			readOnly: true
 		},
 
 		databaseSize: {
