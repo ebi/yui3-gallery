@@ -40,6 +40,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             greyOverlay.on('click', this.hide, this);
             Y.one(document.body).append(greyOverlay);
             this.set('greyOverlay', greyOverlay);
+            this.set('nonCustomOverlay', true);
         }
 
         Y.on('windowresize', function () { Y.later(100, this, this.refresh); }, this);
@@ -52,7 +53,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
             this.get('overlay').destroy();
         }
 
-        if (this.get('greyOverlay')) {
+        if (this.get('nonCustomOverlay') && this.get('greyOverlay')) {
             this.get('greyOverlay').remove();
         }
 
@@ -181,6 +182,9 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         greyOverlay: {
             writeOnce: true
         },
+        nonCustomOverlay: {
+            value: false
+        },
         toggleHidden: {
             value: true,
             validator: Y.Lang.isBoolean
@@ -210,4 +214,4 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
 });
 
 
-}, '@VERSION@' ,{skinnable:true, requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize']});
+}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize'], skinnable:true});
