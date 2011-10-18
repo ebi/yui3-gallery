@@ -22,6 +22,7 @@ var DBMANAGER = 'DatabaseManager',
 	ATTR_DBSIZE = 'databaseSize',
 	ATTR_LIFETIME = 'defaultLifetime',
 	ATTR_LIFETIME_CHECK = 'checkLifetime',
+	ATTR_SAVE_DISABLE = 'saveDisable',
 	ATTR_DISABLED = 'dbDisabledPropertyName',
 	ATTR_ALLOWED = 'allowsAccess',
 	ATTR_CUSTOM = 'customFields',
@@ -207,6 +208,9 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	_disableDBAccess: function () {
 		var name = this.get(ATTR_DISABLED);
 		this._set(ATTR_ALLOWED, false);
+		if (! this.get(ATTR_SAVE_DISABLE)) {
+			return;
+		}
 		try {
 			localStorage.setItem(name, DISABLED);
 		} catch (e) {
@@ -294,6 +298,11 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 		},
 
 		checkLifetime: {
+			value: true,
+			validator: l.isBoolean
+		},
+
+		saveDisable: {
 			value: true,
 			validator: l.isBoolean
 		},
