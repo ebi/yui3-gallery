@@ -97,7 +97,7 @@ Y.DatabaseManager = Y.Base.create(DBMANAGER, Y.Base, [], {
 	 * Returns a date that can easily be replaced
 	 **/
 	_getNow: function () {
-		return Math.floor(Date.now() / 1000);
+		return Math.floor(Y.Lang.now() / 1000);
 	},
 
 	/**
