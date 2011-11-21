@@ -34,8 +34,8 @@ YUI({ base: '/HULLA'}).use('gallery-database-manager', function (Y) {
 
 	function getDB (config) {
 		var defaults = {
-			databaseName: 'unitTestDB' + Date.now(),
-			dbDisabledPropertyName: 'unitTest' + Date.now()
+			databaseName: 'unitTestDB' + Y.Lang.now(),
+			dbDisabledPropertyName: 'unitTest' + Y.Lang.now()
 		};
 		config = Y.mix(defaults, config, true);
 		return (new Y.DatabaseManager(config));
