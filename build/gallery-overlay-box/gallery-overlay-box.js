@@ -12,7 +12,7 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
         container = Y.Node.create('<div class="yui3-overlaybox yui3-overlaybox-hidden"></div>');
         if (! config.container) {
             //No container is given so it should be an ajax overlaybox
-            closeButton = Y.Node.create('<div class="yui3-overlaybox-close-button"></div>');
+            closeButton = Y.Node.create('<div class="yui3-overlaybox-close-button">&nbsp;</div>');
             closeButton.on('click', function (event) {
                 event.halt();
                 this.hide();
@@ -219,4 +219,4 @@ Y.OverlayBox = Y.Base.create(OVERLAYBOX, Y.Base, [], {
 });
 
 
-}, '@VERSION@' ,{requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize'], skinnable:true});
+}, '@VERSION@' ,{skinnable:true, requires:['base', 'node-base', 'gallery-overlay-extras', 'gallery-dispatcher', 'event-resize']});
